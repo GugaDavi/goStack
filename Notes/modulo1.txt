@@ -1,0 +1,101 @@
+Iniciando nosso projeto
+
+  Dando um "yarn init" dentro do diretorio onde queremos colocar nosso projeto,
+  criamos um arquivo package.json, noqual será armazenado todas as informações
+  de dependencias e configurações da nossa aplicação.
+
+  Com esse arquivo qualquer possoa poderá com um unico comando instalar todas as
+  dependencias necessarias para rodas a aplicação.
+
+    "yarn" // Dentro do diretorio, irá instalar as dependencias necessarias para a aplicação
+  
+  A primeira dependencias que iremos instalar é o Express
+  
+    yarn add express
+  
+  Depois criamos nosso servidor. Criando um arquivo .js.
+  Dentro dele fazemos nossas configurações iniciais
+
+    const express = require('express') // Importamos o express
+
+    const server = express() // Passamos os metodos de express para server
+
+    server.listen(3333) // Informamos qual porta nosso servidor irá usar
+
+  Depois dessa primeira configuração, faremos inserimos nossa primeira rota:
+
+    server.get('/home', (req, res) => {
+      res.send('Funcionando')
+    })
+
+    1 - Informamos qual mentodo iremos utilizar, nesse caso GET;
+    2 - Qual rota. nesse caso /home;
+    3 - E o que será feito quando essa rota for acessada;
+
+  A estruturação da URL funciona da seguinte forma:
+
+    ?page=2 - Quando antecedido por "?" é chamado de querys;
+    /user/1 - Seguido de barra é chamado de Route Params;
+
+  Utilizando os conceitos acima podepois utilizar:
+
+    req.query - Para querys no URL;
+    req.params - Para params no URL;
+
+  Uma ferramenta que iremos utilizar é o "nodemon", usado para não ficarmos tendo
+  que reiniciar o servidor sempre que fizermos uma alteração.
+
+    yarn add nodemon -D
+
+    * -D porque é ua dependencia que só iremos utilizar no ambiente de desenvolvimento
+
+  Após, inseremos uma um campo no nosso package.json:
+
+    "scripts": {
+      "dev": "nodemon index.js"
+    }
+
+    Basicamente quando dermos: yarn dev - Nosso servidor será iniciado através do nodemon
+
+  Middlewares:
+
+    Basicamente é a função que diz o que será feito com as resquisições feitas pelo cliente
+
+      Middlewares => (req, res) => {}
+
+    Podemos criar Middlewares locais ou globais:
+
+    Globais:
+
+      server.use((req, res, next) => {
+        console.log('Solicitou')
+
+        next()
+
+        console.log('Finalizado a solicitação')
+      })
+
+      Nesse middlewares global:
+
+        1 - Iremos chamar o terceiro paramentro: next;
+        2 - Caso não inicializarmos o next(), nossa aplicação será quebrada;
+        3 - Com ele chamado, todas as requisições que forem feitas passarão primeiro
+          por ele e depois irá executar a ação propriamente dita;
+
+    Locais:
+
+      Basicamente é quando fazemos um middlewares para uma função especifica,
+      como uma validação.
+
+        const checkName = (req, res, next) => {
+          if ( !req.body.name ) {
+            return res.status(400).json({ erro: Insira um nome valido })
+          }
+          return next()
+        }
+
+        1 - Nesse middlewares fazemos uma checagem se a propriedade nome existe;
+        2 - Caso a propriedade não exista iremos retornar:
+          2.1 - Status 400 - Problema com a forma da solicitação;
+          2.2 - Uma mensagem em json;
+        3 - Caso a propriedade exista, processeguir com a execução;

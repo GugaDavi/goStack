@@ -1,0 +1,53 @@
+Configurações do Systema:
+
+  Instalar: 
+
+    nvm;
+    node - versão LTS;
+    yarn;
+
+Conceitos:
+
+  Node:
+
+  O Node é um é uma plataforma que utiliza JS para rodar no back-end de uma aplicação.
+  Construida em cima do V8, motor por traz do chrome.
+  Comparavel ao PHP, Python, Ruby e Go.
+
+  Npm e Yarn:
+
+  Para instalar bibliotecas de terceiros ou disponibilizar nossas bibliotecas;
+
+  API:
+
+  Diferente de outras linguages a API é uma forma de retornar informações do nosso backend
+  Para o nosso frontend tratar.
+  Utilizando os metodos HTTP:
+    
+    GET - Para consultar dados;
+    POST - Inserir um novo Dado;
+    PUT - Atualizado um dado;
+    DELETE - Excluir um dado;
+
+    HTTP codes:
+
+    Codigos para identificar qual foi o tipo de resposta que tivemos a requisão ao nosso
+    backend. É um resultado número com 3 casas.
+
+      1xx - Iniciando com um. Retorno informativo;
+      2xx - Iniciando com dois. Sucesso no retorno:
+        200 - Success; // Requisição concluida com sucesso
+        201 - Created; // Requisição de criação concluida com sucesso
+      3xx - Iniciando com três. Redirencionamento;
+        301 - Moved Permanently // URL mudou permanentemente (Não retorna a URL original)
+        302 - Moved // Mudou (Pode retornar a URL original)
+      4xx - Iniciando com quatro. Erro do cliente;
+        400 - Bad Request; // Erro na forma da requisição
+        401 - Unauthorized; // Não autorizado
+        404 - Not Found; // Pagina não encontrada
+      5xx - Iniciando com cinco. Erro no servidor;
+        500 - Server Error; // Erro no servidor;
+
+    
+
+
