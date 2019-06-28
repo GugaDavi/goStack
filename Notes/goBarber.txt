@@ -1,0 +1,112 @@
+Configurações:
+
+  Para iniciar criamos uma pasta dentro do nosso diretorio "src" e dentro dela
+  três arquivos:
+
+    app.js
+    server.js
+    routes.js
+
+  A partir de agora iremos separar nossa aplicação entre:
+
+    1 - app.js gerenciar nossas rotas e middlewares e rotas;
+    2 - server.js para estrutura do nosso servidor;
+    3 - routes para nossas rotas;
+
+Inserindo o sucrase-node e o nodemon:
+  
+  Com o sucrase-node podemos utilizar a syntax do ES6 nos nossos codigos node;
+  Conduto o nodemon irá quebrar quando tentar executar da forma comun, pois ele
+  está programado para executar os arquivos com o node.
+
+  Dai criamos um arquivo "nodemon.json", onde iremos colocar a informação que ele
+  deve executar os servidores com o sucrase-node.
+
+    {
+      "execMap": {
+        "js": "sucrase-node"
+      }
+    }
+
+  Depois de toda configuração do banco de dados e do sequelize, iremos começar a
+  fazer nossa primeira migration
+
+  Para isso podemos usar o comando: "yarn sequelize migration:create --name=create-users"
+
+  Depois de rodar o comando será criado nossa migration. Com isso podemos editar o arquivo
+  e criar nossa primeira tabela.
+
+  module.exports = {
+  up: (queryInterface, Sequelize) => { // Metodo para construção da tabela
+    return queryInterface.createTable('users', {
+      id: {
+        type: Sequelize.INTEGER, // Tipo;
+        allowNull: false, // Não permite ser nulo;
+        autoIncrement: true, // Autoincremento;
+        primaryKey: true, // Propriedade primaria
+      },
+      name: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
+      email: {
+        type: Sequelize.STRING,
+        allowNull: false,
+        unique: true, // Dado unico;
+      },
+      password_hash: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
+      provider: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false,
+        allowNull: false,
+      },
+      created_at: { // Quando foi criado
+        type: Sequelize.DATE,
+        allowNull: false,
+      },
+      updated_at: { // Quando foi atualizado
+        type: Sequelize.DATE,
+        allowNull: false,
+      },
+    });
+  },
+
+  down: queryInterface => { // Metodo para exclusão do migration
+    return queryInterface.dropTable('users');
+    },
+  };
+
+  Com nosso arquivo criado podemos dar: "yarn sequelize db:migrate"
+
+  Nossa tabela terá sido criada.
+
+  Caso identeficamos alguma inconsistencia podemos dar: 
+  
+    "yarn sequelize db:migrate:undo:all" - Para desfazer todas as migrations feitas;
+    "yarn sequelize db:migrate:undo" - Para desfazer a ultima;
+
+  Agora criamos nossos models:
+
+    import Sequelize, { Model } from 'sequelize';
+
+    class User extends Model {
+      static init(sequelize) {
+        super.init(
+          {
+            name: Sequelize.STRING,
+            email: Sequelize.STRING,
+            password_hash: Sequelize.STRING,
+            provider: Sequelize.BOOLEAN,
+          },
+          {
+            sequelize,
+          }
+        );
+      }
+    }
+
+    export default User;
+

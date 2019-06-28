@@ -1,0 +1,104 @@
+Banco de dados:
+
+  Instalar docker e docker postgres;
+
+Sequelize:
+
+  É uma ferramenta que utilizamos para fazer monipulação do nosso banco. totalmente
+  diferente da linguagem de banco, nós iremos utilizar somente JS para trabalhar
+  com nossos banco de dados.
+
+  Interessante dizer que os codigos feitos via sequelize podem ser reutilizados em
+  varios bancos como: MySQL, PostgresSQL e outro.
+
+Migrations:
+
+  São usadas para manipulação do nosso banco de dados. Basicamente ele tem uma estrutura
+  onde criamos a tabela com suas colunas e respectivas caracteristicas.
+
+  Pontos importantes:
+
+    * - Uma migration só deve manipular uma unica tabela;
+    * - A migration pode ser alterada durante o desenvolvimento da feature;
+    * - Quando essa migration é passada para outros desenvolvedores ou para a produção
+      não pode ser alterada;
+    * - Para fazer mudanças na alteração que a migration anterior fez, fazemos uma nova
+      migration com as alterações desejadas;
+    * - Migrations não trabalham com tabelas futuras. Se ela precisar de algo de uma tabela
+      que ainda será criada, a migration quebrará;
+
+MVC:
+
+  Model - A estrutura que um de uma informação;
+  Controller - Acessos/Tratativas para os Models;
+  View - Tratativa visual dos dados retornados para o front;
+
+  Informações importates sobre o controller:
+
+    * - Um controller não pode chamar outro controller ou metodo além dos padrões;
+    * - O controller só pode ter até 5 metodos;
+    * - Caso ocorra a necessidade de mais metodos, sinal que está sendo tratado uma
+      nova entidade;
+    
+    Metodos do controller:
+
+      index() {
+        // Consulta de todos os dados;
+      }
+      show() {
+        // Cosulta de um dado especifico;
+      }
+      store() {
+        // Cadastro de um novo dado;
+      }
+      update() {
+        // Atualização de algum dado;
+      }
+      delete() {
+        // Excluir um dado;
+      }
+
+Sequelize:
+
+  Antes de configurar o sequelize criamos a base das pastas e arquivos para nossa aplicação
+
+  Dentro de src:
+
+    config/
+      - database.js
+    database/
+      - migrations/
+    app/
+      - controllers/
+      - models/
+
+  Agora instalamos o sequelize: "yarn add sequelize", criamos um arquivo .sequelizerc
+  Dentro dele configuramos as rotas das pastas e arquivos que criamos:
+
+    const { resolve } = require('path')
+
+    module.exports = {
+      config: resolve(__dirname, 'src', 'config', 'database.js'),
+      'models-path': resolve(__dirname, 'src', 'app', 'models'),
+      'migrations-path': resolve(__dirname, 'src', 'database', 'migrations'),
+      'seeders-path': resolve(__dirname, 'src', 'database', 'seeds')
+    }
+
+  No nosso arquivo database.js:
+
+    module.exports = {
+      dialect: 'postgres', // Dialeto que iremos usar;
+      host: 'localhost',
+      username: 'postgres',
+      password: 'docker',
+      database: 'goBarber',
+      define: {
+        timestamps: true,
+        underscord: true,
+        underscordAll: true,
+      },
+    };
+
+  Para utilizarmos o dialeto do postgres precisamos instalar duas dependecias:
+
+    "yarn add pg pg-hstore"

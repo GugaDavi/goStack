@@ -1,0 +1,69 @@
+Uma nova ferramenta que iremos instalar é o eslint para validação do nosso condigo;
+
+  Instalamos "yarn add eslint -D"
+
+  Depois iniciamos "yarn eslint --init"
+
+  Respondemos as perguntas para configuração;
+
+  As dependencias serão instaladas via npm, dai podemos excluir o package-lock que é gerado
+  e dar um "yarn" que será atualizado as dependencias com o yarn.
+
+  Depois disso ao entrar no nosso projeto, já podemos ver as "reclamações" do eslint
+
+  *Para Ele funcionar deve ter instalado a dependencia no vsCode do esLint*
+
+  No arquivo .json de configuração do vsCode:
+
+    "eslint.autoFixOnSave": true, // Para quando for salvo efetuar as alterações automaticamente;
+    "eslint.validate": [ // Para o eslint aplicar nas linguagens abaixo:
+      {
+        "languege": "javascript",
+        "autoFix": true
+      },
+      {
+        "languege": "javascriptreact",
+        "autoFix": true
+      }
+    ]
+
+  No arquivo .eslint.js:
+
+    extends: [
+      'airbnb-base',
+      'prettier'
+    ],
+
+    rules: {
+      "prettier/prettier": "error",
+      "class-methods-use-this": "off",
+      "no-param-reassign": "off",
+      "camelcase": "off",
+      "no-unused-vars": ["error", { "argsIgnorePattern": "next" }]
+    },
+
+  Agora instalamos o prettier:
+
+    "yarn add prettier estlint-config-prettier eslint-plugin-prettier -D" 
+
+  Depois criamos um arquivo ".prettierrc" nele podemos substituir as configurações
+  padrões.
+
+    {
+      "singleQuote": true, // Usar aspas simples;
+      "trailingComma": "es5" // Para virgua no final de objetos;
+    }
+
+  Quando desejamos que todos um arquivo de uma pasta sejam formatados pelo eslint
+  podemos usar um comando:
+
+    "yarn eslint --fix src --ext .js"
+
+    Basicamente "src" é o nome da pasta e ".js" todos os arquivos que tiverem extensão
+    .js serão validados
+
+  Outra opção é o .editorconfig ele cria um padrão entre editores, para quando na mesma
+  equipe há desenvolvedores que utilizam editores de texto diferentes.
+
+  Cliando com o botão direito no diretorio da aplicação na ultima opção irá aparecer
+  a opção para criar o .editorconfig
