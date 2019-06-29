@@ -29,9 +29,7 @@ Inserindo o sucrase-node e o nodemon:
     }
 
   Depois de toda configuração do banco de dados e do sequelize, iremos começar a
-  fazer nossa primeira migration
-
-  Para isso podemos usar o comando: "yarn sequelize migration:create --name=create-users"
+  fazer nossa primeira migration  
 
   Depois de rodar o comando será criado nossa migration. Com isso podemos editar o arquivo
   e criar nossa primeira tabela.
@@ -88,6 +86,31 @@ Inserindo o sucrase-node e o nodemon:
     "yarn sequelize db:migrate:undo:all" - Para desfazer todas as migrations feitas;
     "yarn sequelize db:migrate:undo" - Para desfazer a ultima;
 
+  Agora configuramos a conexção com nosso db:
+
+  Em src/database/index.js
+
+    import Sequelize from 'sequelize'
+
+    import databaseConfig from '../config/database'
+    import User from '../app/models/User'
+
+    const models = [User]
+
+    class Database {
+      constructor() {
+        this.init()
+      }
+
+      init() {
+        this.connection = new Sequelize(databaseConfig)
+
+        models.map(model => model.init(this.connection))
+      }
+    }
+
+    export default new Database()
+
   Agora criamos nossos models:
 
     import Sequelize, { Model } from 'sequelize';
@@ -109,4 +132,220 @@ Inserindo o sucrase-node e o nodemon:
     }
 
     export default User;
+
+  Inserimos no nosso app.js
+
+    import './database'
+
+  Agora criamos nosso controler:
+
+    import User from '../models/User'
+
+    class UserController {
+      async store(req, res) {
+        const userExist = await User.findOne({ where: { email: req.body.email } })
+
+        if (userExist) { // Verifica se existe algum cadastro com esse e-mail
+          return res.status(400).json({ error: 'User already exists.' }) 
+        }
+
+        const { id, name, email } = await User.create(req.body)
+
+        return res.json({
+          id,
+          name,
+          email
+        })
+      }
+    }
+
+    export default new UserController()
+
+  E atualizamos nossas rotas:
+
+    import UserController from './app/controllers/UserControllers'
+
+    routes.post('users', UserConterller.store)
+
+  Agora para armazernarmos de uma forma mais segura nossa senha adicionaremos uma nova dependencia:
+
+    "yarn add bcryptjs"
+
+  Com essa ferramenta podemos armazenar de forma criptografada o password.
+  Atualizando o Model User:
+
+    import Sequelize, { Model } from 'sequelize'
+    import bcrypt from 'bcryptjs'
+
+    class User extends Model {
+      static init(sequelize) {
+        super.init(
+          {
+            name: Sequelize.STRING,
+            email: Sequelize.STRING,
+            password: Sequelize.VIRTUAL, // Criamos um campo que irá receber a senha;
+            password_hash: Sequelize.STRING, // Esse campo para a senha criptografada
+            provider: Sequelize.BOOLEAN
+          },
+          {
+            sequelize,
+          }
+        )
+        this.addHook('beforeSave', async (user) => { // Criptografa a senha.
+          if (user.password) {
+            user.password_hash = await bcrypt.hash(user.password, 8)
+          }
+        })
+
+        return this
+      }
+    }
+
+    export default User
+
+  Com as configurações até aqui já estamos com cadastro funcionando e criptografando a senha.
+
+  A partir de agora vamos para configuração de sessão.
+
+  Primeiro passo é criar nosso controller de session. Vamos chama-lo de SessionController.js
+
+  Antes iremos precisar de uma dependencia para criar um certificado de autenticação.
+  O JWT é um serviço que armazena um codigo(token), para garatir que é um usuario especifico
+  que está logando no sistema.
+
+    "yarn add jsonwebtoken"
+
+  Dai podemos partir para nosso SessionController.js:
+
+    import jwt from 'jsonwebtoken' // Chamamos o jwt
+
+    import User from '../models/User'
+    import auth from '../../config/auth' // Chamos o arquivo que irá guardar a chave para o token
+
+    class SessionController {
+      async store(req, res) {
+        const { email, password } = req.body
+
+        const user = await User.findOne({ where: { email } })
+      
+        if (!user) {
+          res.status(401).json({ error: 'User not found' })
+        }
+
+        if (!(await user.checkPassword(password))) {
+          res.status(401).json({ error: 'Password does not match' })
+        }
+
+        const { id, name } = user
+
+        return res.json({
+          user: {
+            id,
+            name,
+            email,
+          },
+          token: jwt.sign({ id }, auth.secret, { (*)
+            expiresIn: auth.expiresIn
+          })
+        })
+      }
+    }
+
+    export default new SessionController()
+
+    (*) - Quando for feita essa autenticação será retornado o token. Esse processo exige 3 paramentros:
+
+      1 - Id do usuario logado;
+      2 - Uma string, usamos uma string formatada com o md5;
+      3 - O tempo que essa chave será valida;
+
+  Agora vamos ao processo de update e autenticação para tal criaremos um middleware que irá ser passado
+  quando quando for solicitado uma alteração, ser certificado:
+
+    Primeiro precisamos utilizar o token que é gerado no inicio da sessão. No insomnia na aba "Bearer"
+    no item "Token" Inserimos o token gerado
+
+    Primeiro criamos um arquivo middlewares/auth.js
+
+      import jwt from 'jsonwebtoken'
+      import { promisify } from 'util' // Chamaremos esse metodo para "simplificar" o processo de validação
+      
+      import authConfig from '../config/auth' // Importamos
+
+      export default async (req, res, next) => {
+        const authHeader = req.headers.authorization
+
+        if (!authHeader) { // Nos certificamos que foi enviado o token
+          res.status(401).json({ error: 'Token not provided' })
+        }
+
+        const [, token] = authHeader.split(' ') // Separamos somente a parte que desejamos utilizar
+
+        try {
+          const decoded = await promisify(jwt.verify)(token, authConfig.secret)
+          // Nessa parte fazemos um comparativo entre o token enviado com o token da session
+
+          req.userId = decoded.id // Dando tudo ok, passamos o "id" para "req"
+          
+          return next()
+        } catch (err) {
+          res.status(401).json({ error: 'Token invalid' })
+        }
+
+        return next()
+      }
+
+    Agora atualizamos nossas rotas:
+
+      import authMiddlewares from './middlewares/auth'
+
+    E antes da rota que irá precisar da validação do token inserimos:
+
+      routes.use(authMiddlewares)
+
+    Dessa forma todas as rotas que estiverem a baixo será feito a autenticação do token.
+
+  Atualização de usuario: 
+
+    Criamos um metodo dentro de UserController:
+
+    async update(req, res) {
+      const { email, oldPassword } = req.body // Irá pedir obrigatoriamente o e-mail
+
+      const user = await User.findByPk(req.userId) // Puxamos o id recebemos atraves do middleware anterior
+
+      if ( email !== user.email ) { // Validação de email
+        const userExist = await User.findOne({ where: { email } }) // Se o email está sendo utilizado
+
+        if (userExist) {
+          res.status(401).json({ error: 'User already exists' })
+        }
+      }
+
+      if (oldPassword && !(await user.checkPassword(oldPassword))) { // Para alterar a senha, precisamos fornecer a antiga
+        res.status(401).json({ error: 'Password does not match' })
+      }
+
+      const { id, name, provider } = await user.update(req.body) // Passando nos validadores acima, atualizamos a linha
+
+      return res.json({
+        id,
+        name,
+        email,
+        provider
+      })
+    }
+
+  Validação dos campos informados:
+
+    O primeiro passo é instalar uma nova dependencia: "yarn add yup"
+
+    Esse será responsavel para validar dados de entrada para nossas requisições.
+
+    
+
+
+
+
+
 

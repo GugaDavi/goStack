@@ -1,7 +1,5 @@
 Banco de dados:
 
-  Instalar docker e docker postgres;
-
 Sequelize:
 
   É uma ferramenta que utilizamos para fazer monipulação do nosso banco. totalmente
@@ -58,12 +56,21 @@ MVC:
         // Excluir um dado;
       }
 
+Instalar docker e docker postgres;
+
+Depois rodamos o comando: "docker run --name xxx -e POSTGRES_PASSWORD=senha -p 5432:5432 -d postgres"
+
+  xxx - Nome do banco;
+  senha - Senha para acessar o banco
+
+Instalamos o Postbird e fazemos a conexão com nosso container que acabamos de criar.
+Depois criamos o nosso banco de dados.
+
 Sequelize:
 
   Antes de configurar o sequelize criamos a base das pastas e arquivos para nossa aplicação
 
   Dentro de src:
-
     config/
       - database.js
     database/
@@ -72,8 +79,12 @@ Sequelize:
       - controllers/
       - models/
 
-  Agora instalamos o sequelize: "yarn add sequelize", criamos um arquivo .sequelizerc
-  Dentro dele configuramos as rotas das pastas e arquivos que criamos:
+  Agora instalamos o sequelize: 
+  
+    "yarn add sequelize"
+    "yarn add sequelize-cli -D"
+    
+  Criamos um arquivo .sequelizerc dentro dele configuramos as rotas das pastas e arquivos que criamos:
 
     const { resolve } = require('path')
 
@@ -102,3 +113,9 @@ Sequelize:
   Para utilizarmos o dialeto do postgres precisamos instalar duas dependecias:
 
     "yarn add pg pg-hstore"
+
+  Por fim criamos nossa migration:
+
+    "yarn sequelize migration:create --name=create-users"
+
+  Nesse momento será criado o arquivo de migration na pasta migrations.
