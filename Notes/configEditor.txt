@@ -33,6 +33,7 @@ Uma nova ferramenta que iremos instalar é o eslint para validação do nosso co
       'airbnb-base',
       'prettier'
     ],
+    plugins: ['prettier']
 
     rules: {
       "prettier/prettier": "error",
