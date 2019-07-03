@@ -45,7 +45,7 @@ Uma nova ferramenta que iremos instalar é o eslint para validação do nosso co
 
   Agora instalamos o prettier:
 
-    "yarn add prettier estlint-config-prettier eslint-plugin-prettier -D" 
+    "yarn add prettier eslint-config-prettier eslint-plugin-prettier -D" 
 
   Depois criamos um arquivo ".prettierrc" nele podemos substituir as configurações
   padrões.
